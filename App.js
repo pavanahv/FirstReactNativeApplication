@@ -6,24 +6,59 @@
  * @flow
  */
 
-import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+import React, { Component } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput
+} from 'react-native';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+import Forecast from "./Forecast.js"
+import OpenWeatherMap from "./OpenWeatherMap.js";
 
-type Props = {};
-export default class App extends Component<Props> {
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { zip: "", forecast: null }
+  }
+
+  _handleTextChange = event => {
+    let zip = event.nativeEvent.text;
+    //console.log(zip);
+    OpenWeatherMap.fetchForecast(zip).then(forecast => {
+      //console.log(forecast);
+      this.setState({ zip: zip, forecast: forecast });
+    });
+  };
+
   render() {
+
+    let content = null;
+    if (this.state.forecast !== null) {
+      content = (
+        <Forecast
+          main={this.state.forecast.main}
+          description={this.state.forecast.description}
+          temp={this.state.forecast.temp}
+        />
+      );
+    }
+
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
+      <View
+        style={styles.container}>
+
+        <Text
+          style={styles.welcome}>
+          Selected {this.state.zip}
+        </Text>
+        {content}
+        <TextInput
+          style={styles.input}
+          onSubmitEditing={this._handleTextChange}
+        />
+
       </View>
     );
   }
@@ -34,16 +69,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: "#666666"
   },
   welcome: {
     fontSize: 20,
     textAlign: 'center',
     margin: 10,
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+  input: {
+    fontSize: 20,
+    borderWidth: 2,
+    padding: 2,
+    height: 40,
+    width: 100,
+    textAlign: "center"
   },
 });
+
+export default App;
